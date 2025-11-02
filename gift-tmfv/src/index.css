@@ -1,0 +1,1 @@
+@tailwind base;@tailwind components;@tailwind utilities;html,body,#root{height:100%}.bg-lux{background:radial-gradient(800px 400px at 80% -10%,rgba(207,175,88,.25),transparent 60%),linear-gradient(135deg,#0a1e3f,#102e60 60%)}.card{background:#fff;color:#0a1e3f;border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.15)}.footer{color:#d7c392}
