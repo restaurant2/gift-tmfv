@@ -1,55 +1,61 @@
-import React,{useEffect,useState} from 'react'
-import { db, collection, doc, getDoc, setDoc, getDocs } from '../firebase'
+import React, { useState } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "./firebaseConfig";
+import "./login.css";
 
-const seed=[
-  {username:'mahmoud', name:'محمود ابوقاعود', role:'admin', password:'admin2025'},
-  {username:'mohammed.m', name:'محمد محيسن', role:'student', password:'moh2025'},
-  {username:'mohammed.s', name:'محمد شنير', role:'student', password:'shn2025'},
-  {username:'thar.q', name:'ثأر قسوم', role:'student', password:'thar2025'},
-  {username:'zahia', name:'زهيه', role:'student', password:'zah2025'},
-  {username:'wafa', name:'وفاء', role:'student', password:'wafa2025'},
-  {username:'shaima', name:'شيماء', role:'student', password:'sha2025'},
-  {username:'nabila', name:'نبيله', role:'student', password:'nab2025'},
-  {username:'nafeen', name:'نفين', role:'student', password:'naf2025'},
-  {username:'sana', name:'سناء', role:'student', password:'san2025'},
-  {username:'ibrahim.d', name:'ابراهيم دنف', role:'student', password:'ibr2025'},
-  {username:'dana', name:'دنه', role:'student', password:'dan2025'},
-  {username:'yara', name:'ياره', role:'student', password:'yar2025'},
-  {username:'fatma.n', name:'فاطمه نور', role:'student', password:'fat2025'},
-  {username:'noreen', name:'نورين', role:'student', password:'nor2025'},
-  {username:'amer', name:'أمر', role:'student', password:'amr2025'}
-]
+function Login({ onLogin }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-export default function Login({onLogged}){
-  const[username,setUsername]=useState('')
-  const[password,setPassword]=useState('')
-  const[busy,setBusy]=useState(false)
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const usersRef = collection(db, "students");
+      const q = query(
+        usersRef,
+        where("username", "==", username),
+        where("password", "==", password)
+      );
+      const querySnapshot = await getDocs(q);
 
-  useEffect(()=>{(async()=>{
-    const col=collection(db,'users'); const snap=await getDocs(col)
-    if(snap.empty){ for(const u of seed){ await setDoc(doc(col,u.username),u) } }
-  })()},[])
+      if (querySnapshot.empty) {
+        setError("❌ اسم المستخدم أو كلمة المرور غير صحيحة");
+      } else {
+        const userData = querySnapshot.docs[0].data();
+        setError("");
+        alert(`✅ مرحبًا ${userData.name}!`);
+        onLogin(userData);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("حدث خطأ أثناء تسجيل الدخول");
+    }
+  };
 
-  const submit=async()=>{
-    setBusy(true)
-    try{
-      const ref=doc(collection(db,'users'), username.trim())
-      const s=await getDoc(ref)
-      if(!s.exists()) throw new Error('no user')
-      const u=s.data()
-      if(u.password!==password.trim()) throw new Error('bad')
-      onLogged(u)
-    }catch(e){ alert('بيانات الدخول غير صحيحة') }
-    setBusy(false)
-  }
-
-  return(<div className="min-h-screen bg-lux flex items-center justify-center p-6">
-    <div className="bg-white text-royal rounded-2xl p-6 w-full max-w-md shadow">
-      <h1 className="text-2xl font-bold text-center mb-4">gift-tmfv 🎁</h1>
-      <input className="w-full p-3 border rounded mb-3 text-center" placeholder="اسم المستخدم" value={username} onChange={e=>setUsername(e.target.value)}/>
-      <input className="w-full p-3 border rounded mb-4 text-center" placeholder="كلمة المرور" type="password" value={password} onChange={e=>setPassword(e.target.value)}/>
-      <button onClick={submit} disabled={busy} className="w-full py-3 bg-deepRed text-white rounded">{busy?'جاري التحقق…':'دخول'}</button>
-      <p className="mt-4 text-center text-gray-500">تم تصميم الموقع من قبل محمود ابوقاعود 💎</p>
+  return (
+    <div className="login-container">
+      <h1>🎓 تسجيل الدخول</h1>
+      <form onSubmit={handleLogin}>
+        <input
+          type="text"
+          placeholder="اسم المستخدم"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="كلمة المرور"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">تسجيل الدخول</button>
+      </form>
+      {error && <p className="error">{error}</p>}
     </div>
-  </div>)
+  );
 }
+
+export default Login;
