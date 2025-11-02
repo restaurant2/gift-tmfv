@@ -1,0 +1,2 @@
+import React,{useRef,useState,useEffect} from 'react'
+export default function MusicToggle(){const a=useRef(null);const[on,setOn]=useState(false);useEffect(()=>{if(!a.current)return;on?a.current.play().catch(()=>{}):a.current.pause()},[on]);return(<div className="fixed left-4 bottom-4 z-50"><audio ref={a} src="/piano.mp3" loop preload="auto"/><button onClick={()=>setOn(v=>!v)} className="px-4 py-2 bg-gold text-royal rounded-full shadow hover:opacity-90">{on?'إيقاف الموسيقى':'تشغيل الموسيقى 🎵'}</button></div>)}
